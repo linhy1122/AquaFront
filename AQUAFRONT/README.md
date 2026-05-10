@@ -10,6 +10,11 @@ AQUAFRONT/
 │   ├── main.js                 # 应用入口
 │   ├── App.vue                 # 根组件
 │   ├── style.css               # 全局样式
+│   ├── api/                    # API 服务层
+│   │   ├── request.js          # Axios 实例
+│   │   ├── auth.js             # 认证 API
+│   │   ├── user.js             # 用户 API
+│   │   └── index.js            # 统一导出
 │   ├── router/
 │   │   └── index.js           # 路由配置
 │   ├── layouts/
@@ -120,4 +125,58 @@ npm run preview
 - Vue 3 (Composition API)
 - Vue Router 4
 - Vite
+- Axios
 - 原生 CSS (无第三方 CSS 框架)
+
+## API 集成
+
+### 安装依赖
+```bash
+npm install axios
+```
+
+### API 服务结构
+```
+src/api/
+├── request.js    # Axios 实例，自动添加 Token，处理响应
+│                 # 基础路径: http://localhost:8899/Aqua
+├── auth.js       # 认证相关 API
+│   ├── getCaptcha()     # 获取验证码
+│   ├── login(data)      # 用户登录
+│   ├── register(data)   # 用户注册
+│   ├── createUser(data) # 创建用户
+│   ├── getCurrentUser() # 获取当前用户信息
+│   ├── logout()         # 退出登录
+│   └── adminTest()      # 管理员权限测试
+├── user.js       # 用户管理 API
+│   ├── getUsers()       # 获取用户列表
+│   ├── getUser(id)      # 获取用户详情
+│   ├── updateUser(id, data)  # 更新用户
+│   └── deleteUser(id)   # 删除用户
+└── index.js      # 统一导出
+```
+
+### 使用示例
+```javascript
+import { authApi, userApi } from '@/api'
+
+// 登录
+const res = await authApi.login({ username, password, captcha })
+if (res.success) {
+  localStorage.setItem('token', res.data.token)
+}
+
+// 获取用户列表（需 ADMIN 角色）
+const users = await userApi.getUsers()
+```
+
+## 已完成功能
+
+### 用户管理
+- ✅ 获取用户列表 (`/api/admin/users`)
+- ✅ 新增用户 (`/api/admin/users`)
+- ✅ 编辑用户 (`/api/admin/users/{id}`)
+- ✅ 重置密码（单独弹窗）
+- ✅ 删除用户 (`/api/admin/users/{id}`)
+
+> **注意**：后端验证要求编辑用户时密码必填，如只需修改邮箱/角色/状态，请先填写一个密码

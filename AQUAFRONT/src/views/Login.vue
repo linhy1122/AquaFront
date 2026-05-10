@@ -15,23 +15,16 @@
           <input type="password" id="password" v-model="form.password" placeholder="请输入密码" required>
         </div>
 
-        <div class="form-group">
-          <label for="role">角色</label>
-          <select id="role" v-model="form.role">
-            <option value="admin">管理员</option>
-            <option value="user">普通用户</option>
-          </select>
-        </div>
+<div class="form-group captcha-group">
+            <label for="captcha">验证码</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="captcha" v-model="form.captcha" placeholder="请输入验证码" style="flex: 1;">
+              <img :src="captchaImage.image" alt="验证码" class="captcha-image" @click="loadCaptcha" style="cursor: pointer; height: 40px;">
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-            <input type="checkbox" id="remember" v-model="form.remember">
-            <span style="font-weight: normal;">记住密码</span>
-          </label>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block">登 录</button>
-      </form>
+          <button type="submit" class="btn btn-primary btn-block">登 录</button>
+        </form>
 
       <div style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
         <a href="#" style="color: #1890ff; text-decoration: none;">忘记密码?</a>
@@ -49,24 +42,65 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
+import { reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { authApi } from '@/api'
 
 const router = useRouter()
 
 const form = reactive({
   username: '',
   password: '',
-  role: 'admin',
+  captcha: '',
   remember: false
 })
 
-const handleLogin = () => {
-  if ((form.username === 'admin' && form.password === 'admin123') ||
-      (form.username === 'user' && form.password === 'user123')) {
-    router.push('/dashboard')
-  } else {
-    alert('用户名或密码错误，请重试！')
+const captchaImage = reactive({
+  image: '',
+  key: ''
+})
+
+const loadCaptcha = async () => {
+  try {
+    const res = await authApi.getCaptcha()
+    if (res.success) {
+      captchaImage.image = res.data.captchaImage
+      captchaImage.key = res.data.captchaKey
+    }
+  } catch (error) {
+    console.error('加载验证码失败:', error)
   }
 }
+
+onMounted(() => {
+  loadCaptcha()
+})
+
+const handleLogin = async () => {
+   try {
+     const loginData = {
+       username: form.username,
+       password: form.password
+     }
+     if (form.captcha?.trim()) {
+       loginData.captcha = form.captcha
+     }
+     const res = await authApi.login(loginData)
+     if (res.success) {
+       localStorage.setItem('token', res.data.token)
+       localStorage.setItem('username', res.data.username)
+       localStorage.setItem('role', res.data.role)
+       localStorage.setItem('userId', res.data.userId)
+       router.push('/dashboard')
+     } else {
+       console.log('Login failed:', res)
+       alert(res.message || '登录失败')
+       loadCaptcha()
+     }
+   } catch (error) {
+     console.error('Login error:', error)
+     alert(error.message || '登录失败，请重试')
+     loadCaptcha()
+   }
+ }
 </script>
