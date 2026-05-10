@@ -1,2 +1,7 @@
 export { authApi } from './auth'
 export { userApi } from './user'
+export { dashboardApi } from './dashboard'
+export { stockingApi } from './stocking'
+export { feedApi } from './feed'
+export { pondApi } from './pond'
+export { statisticApi } from './statistic'
