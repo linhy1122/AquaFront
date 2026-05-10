@@ -111,8 +111,12 @@
         <div class="modal-body">
           <div class="form-grid">
             <div class="form-group">
-              <label>物料 ID <span style="color:red">*</span></label>
-              <input type="number" v-model.number="inStockForm.materialId" placeholder="请输入物料ID">
+              <label>物料 ID</label>
+              <input type="number" v-model.number="inStockForm.materialId" placeholder="与物料名称二选一">
+            </div>
+            <div class="form-group">
+              <label>物料名称</label>
+              <input type="text" v-model="inStockForm.materialName" placeholder="与物料ID二选一，不存在时自动创建">
             </div>
             <div class="form-group">
               <label>入库数量(kg) <span style="color:red">*</span></label>
@@ -129,6 +133,9 @@
             <div class="form-group" style="grid-column: span 2;">
               <label>备注</label>
               <textarea v-model="inStockForm.remark" placeholder="选填" rows="2"></textarea>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+              <small style="color:#888;">物料匹配规则：优先按物料ID查找；ID不存在但有物料名称时自动创建新物料；仅提供物料名称时按名称查找，不存在则新建。</small>
             </div>
           </div>
         </div>
@@ -250,23 +257,30 @@ const showInStockDialog = ref(false)
 const stockSubmitting = ref(false)
 const inStockForm = reactive({
   materialId: null,
+  materialName: '',
   quantity: null,
   unitPrice: null,
   operator: '',
   remark: ''
 })
 
-const openInStockDialog = () => {
+const resetInStockForm = () => {
   inStockForm.materialId = null
+  inStockForm.materialName = ''
   inStockForm.quantity = null
   inStockForm.unitPrice = null
   inStockForm.operator = ''
   inStockForm.remark = ''
+}
+
+const openInStockDialog = () => {
+  resetInStockForm()
   showInStockDialog.value = true
 }
 
 const openInStockDialogFor = (item) => {
   inStockForm.materialId = item.materialId
+  inStockForm.materialName = item.name || ''
   inStockForm.quantity = null
   inStockForm.unitPrice = item.unitPrice || null
   inStockForm.operator = ''
@@ -275,27 +289,35 @@ const openInStockDialogFor = (item) => {
 }
 
 const handleInStock = async () => {
-  if (!inStockForm.materialId || !inStockForm.quantity) {
-    alert('请填写物料ID和数量')
+  if (!inStockForm.quantity || (!inStockForm.materialId && !inStockForm.materialName)) {
+    alert('请填写入库数量，并提供物料ID或物料名称（二选一）')
     return
   }
   stockSubmitting.value = true
   try {
-    const payload = { ...inStockForm }
-    if (!payload.unitPrice) delete payload.unitPrice
-    if (!payload.operator) delete payload.operator
-    if (!payload.remark) delete payload.remark
-    
+    const payload = {
+      quantity: inStockForm.quantity
+    }
+    // 物料ID和物料名称二选一：优先ID，其次名称
+    if (inStockForm.materialId) {
+      payload.materialId = inStockForm.materialId
+    } else if (inStockForm.materialName) {
+      payload.materialName = inStockForm.materialName
+    }
+    if (inStockForm.unitPrice) payload.unitPrice = inStockForm.unitPrice
+    if (inStockForm.operator) payload.operator = inStockForm.operator
+    if (inStockForm.remark) payload.remark = inStockForm.remark
+
     const res = await feedApi.inStock(payload)
     if (res.success) {
       showInStockDialog.value = false
       fetchInventory()
-      alert(res.message || '入库成功')
     } else {
       alert(res.message || '入库失败')
     }
   } catch (err) {
     alert('请求失败: ' + (err.message || '未知错误'))
+    console.error('入库失败:', err)
   } finally {
     stockSubmitting.value = false
   }

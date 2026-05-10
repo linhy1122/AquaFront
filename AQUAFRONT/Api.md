@@ -898,11 +898,14 @@ Content-Type: application/json
 
 | 字段 | 类型 | 必填 | 校验规则 | 示例 |
 |------|------|------|----------|------|
-| `materialId` | number | 是 | 不能为空 | `1` |
+| `materialId` | number | 否 | 与 materialName 二选一 | `1` |
+| `materialName` | string | 否 | 与 materialId 二选一 | `对虾配合饲料` |
 | `quantity` | number | 是 | 必须大于 0 | `500` |
 | `unitPrice` | number | 否 | — | `150.00` |
 | `operator` | string | 否 | — | `张三` |
 | `remark` | string | 否 | — | `新批次饲料到货` |
+
+> **物料匹配规则**：优先按 `materialId` 查找；不存在时若有 `materialName` 则自动创建新物料；仅提供 `materialName` 时按名称查找或新建。
 
 **响应示例：**
 
@@ -1407,11 +1410,14 @@ GET /api/statistic/stocking
 
 | 字段 | 类型 | 必填 | 校验规则 | 说明 |
 |------|------|------|----------|------|
-| `materialId` | Integer | 是 | `@NotNull` | 物料 ID |
+| `materialId` | Integer | 否 | 与 materialName 二选一 | 物料 ID（优先使用） |
+| `materialName` | String | 否 | 与 materialId 二选一 | 饲料名称（不存在时自动创建物料） |
 | `quantity` | Double | 是 | `@Min(0)` | 入库数量（kg） |
 | `unitPrice` | Double | 否 | — | 单价（元/kg） |
 | `operator` | String | 否 | — | 操作人 |
 | `remark` | String | 否 | — | 备注 |
+
+> 物料匹配规则：优先按 `materialId` 查找物料；`materialId` 不存在但有 `materialName` 时自动创建新物料（类别=饲料，单位=kg）；仅提供 `materialName` 时按名称查找，不存在则新建。
 
 ### 10.9 饲料出库请求（FeedOutStockDTO）
 
