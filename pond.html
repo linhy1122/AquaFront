@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塘口管理 - 智慧水产养殖系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🐟 智慧水产养殖</h2>
+                <p>管理系统 v1.0</p>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-group">
+                    <div class="menu-group-title">主菜单</div>
+                    <a href="dashboard.html" class="menu-item">
+                        <span>📊</span> 仪表盘
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">基础管理</div>
+                    <a href="warehouse.html" class="menu-item">
+                        <span>📦</span> 仓储管理
+                    </a>
+                    <a href="pond.html" class="menu-item active">
+                        <span>🏞️</span> 塘口管理
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">监测监控</div>
+                    <a href="monitoring.html" class="menu-item">
+                        <span>🔬</span> 水质监测
+                    </a>
+                    <a href="equipment.html" class="menu-item">
+                        <span>⚙️</span> 设备监控
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">业务管理</div>
+                    <a href="feeding.html" class="menu-item">
+                        <span>🍽️</span> 投喂管理
+                    </a>
+                    <a href="alarm.html" class="menu-item">
+                        <span>🚨</span> 报警管理
+                    </a>
+                    <a href="report.html" class="menu-item">
+                        <span>📈</span> 报表统计
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">系统设置</div>
+                    <a href="user.html" class="menu-item">
+                        <span>👤</span> 用户管理
+                    </a>
+                    <a href="login.html" class="menu-item">
+                        <span>🚪</span> 退出登录
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 头部 -->
+            <header class="header">
+                <div class="header-left">
+                    <h3>塘口管理</h3>
+                </div>
+                <div class="header-right">
+                    <div class="notification-bell">
+                        🔔
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar">管</div>
+                        <div>
+                            <div style="font-weight: 500;">管理员</div>
+                            <div style="font-size: 12px; color: #666;">admin</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content">
+                <div class="page-header">
+                    <h1>塘口管理中心</h1>
+                    <div class="breadcrumb">首页 / 基础管理 / 塘口管理</div>
+                </div>
+
+                <!-- 标签页 -->
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('basic')">塘口基本信息</div>
+                    <div class="tab" onclick="switchTab('species')">养殖品种记录</div>
+                    <div class="tab" onclick="switchTab('stock')">放养数量记录</div>
+                </div>
+
+                <!-- 塘口基本信息 -->
+                <div id="basicTab" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>塘口列表</h3>
+                            <button class="btn btn-primary btn-sm" onclick="showAddPondModal()">+ 新增塘口</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="toolbar">
+                                <div class="search-box">
+                                    <input type="text" placeholder="搜索塘口名称...">
+                                    <select>
+                                        <option>全部状态</option>
+                                        <option>使用中</option>
+                                        <option>空闲</option>
+                                        <option>维护中</option>
+                                    </select>
+                                    <button class="btn btn-primary btn-sm">查询</button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>塘口编号</th>
+                                            <th>塘口名称</th>
+                                            <th>面积(亩)</th>
+                                            <th>水深(m)</th>
+                                            <th>水源类型</th>
+                                            <th>当前状态</th>
+                                            <th>负责人</th>
+                                            <th>创建时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>P001</td>
+                                            <td><strong>1号塘口</strong></td>
+                                            <td>5.0</td>
+                                            <td>1.8</td>
+                                            <td>地下水</td>
+                                            <td><span class="badge badge-success">使用中</span></td>
+                                            <td>张三</td>
+                                            <td>2025-03-15</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-warning btn-sm">详情</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>P002</td>
+                                            <td><strong>2号塘口</strong></td>
+                                            <td>6.5</td>
+                                            <td>2.0</td>
+                                            <td>河水</td>
+                                            <td><span class="badge badge-success">使用中</span></td>
+                                            <td>李四</td>
+                                            <td>2025-03-15</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-warning btn-sm">详情</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>P003</td>
+                                            <td><strong>3号塘口</strong></td>
+                                            <td>4.8</td>
+                                            <td>1.5</td>
+                                            <td>水库水</td>
+                                            <td><span class="badge badge-success">使用中</span></td>
+                                            <td>王五</td>
+                                            <td>2025-03-16</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-warning btn-sm">详情</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>P004</td>
+                                            <td><strong>4号塘口</strong></td>
+                                            <td>7.2</td>
+                                            <td>2.2</td>
+                                            <td>地下水</td>
+                                            <td><span class="badge badge-success">使用中</span></td>
+                                            <td>张三</td>
+                                            <td>2025-03-16</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-warning btn-sm">详情</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>P005</td>
+                                            <td><strong>5号塘口</strong></td>
+                                            <td>5.5</td>
+                                            <td>1.8</td>
+                                            <td>河水</td>
+                                            <td><span class="badge badge-success">使用中</span></td>
+                                            <td>李四</td>
+                                            <td>2025-04-01</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-warning btn-sm">详情</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>P006</td>
+                                            <td><strong>6号塘口</strong></td>
+                                            <td>6.0</td>
+                                            <td>2.0</td>
+                                            <td>水库水</td>
+                                            <td><span class="badge badge-info">空闲</span></td>
+                                            <td>王五</td>
+                                            <td>2025-04-05</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-warning btn-sm">详情</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="pagination">
+                                <button disabled>上一页</button>
+                                <span class="page-info">第 1 页 / 共 2 页</span>
+                                <button>下一页</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 塘口统计 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>塘口统计</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon blue">🏞️</div>
+                                    <div class="stat-info">
+                                        <h4>塘口总数</h4>
+                                        <div class="value">12</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon green">✅</div>
+                                    <div class="stat-info">
+                                        <h4>使用中</h4>
+                                        <div class="value">10</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon orange">⏸️</div>
+                                    <div class="stat-info">
+                                        <h4>空闲</h4>
+                                        <div class="value">2</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon blue">📏</div>
+                                    <div class="stat-info">
+                                        <h4>总面积(亩)</h4>
+                                        <div class="value">68.5</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 养殖品种记录 -->
+                <div id="speciesTab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>养殖品种记录</h3>
+                            <button class="btn btn-primary btn-sm" onclick="showAddSpeciesModal()">+ 新增品种</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>塘口</th>
+                                            <th>养殖品种</th>
+                                            <th>品种特性</th>
+                                            <th>放养日期</th>
+                                            <th>预计上市日期</th>
+                                            <th>养殖周期(天)</th>
+                                            <th>当前规格</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1号塘口</td>
+                                            <td><strong>草鱼</strong></td>
+                                            <td>生长快、肉质好</td>
+                                            <td>2026-03-15</td>
+                                            <td>2026-09-15</td>
+                                            <td>180</td>
+                                            <td>500g/尾</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2号塘口</td>
+                                            <td><strong>鲤鱼</strong></td>
+                                            <td>适应性强</td>
+                                            <td>2026-03-18</td>
+                                            <td>2026-08-18</td>
+                                            <td>150</td>
+                                            <td>450g/尾</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3号塘口</td>
+                                            <td><strong>鲢鱼</strong></td>
+                                            <td>滤食性、净化水质</td>
+                                            <td>2026-03-20</td>
+                                            <td>2026-09-20</td>
+                                            <td>180</td>
+                                            <td>400g/尾</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>4号塘口</td>
+                                            <td><strong>鲫鱼</strong></td>
+                                            <td>耐低氧、生长快</td>
+                                            <td>2026-04-01</td>
+                                            <td>2026-10-01</td>
+                                            <td>180</td>
+                                            <td>250g/尾</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>5号塘口</td>
+                                            <td><strong>草鱼</strong></td>
+                                            <td>生长快、肉质好</td>
+                                            <td>2026-04-05</td>
+                                            <td>2026-10-05</td>
+                                            <td>180</td>
+                                            <td>350g/尾</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 放养数量记录 -->
+                <div id="stockTab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>放养数量记录</h3>
+                            <button class="btn btn-primary btn-sm" onclick="showAddStockModal()">+ 新增记录</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>塘口</th>
+                                            <th>品种</th>
+                                            <th>放养数量(尾)</th>
+                                            <th>放养日期</th>
+                                            <th>平均规格(g/尾)</th>
+                                            <th>总重量(kg)</th>
+                                            <th>存活率(%)</th>
+                                            <th>当前数量(尾)</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1号塘口</td>
+                                            <td>草鱼</td>
+                                            <td>5,000</td>
+                                            <td>2026-03-15</td>
+                                            <td>150</td>
+                                            <td>750</td>
+                                            <td>96%</td>
+                                            <td>4,800</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2号塘口</td>
+                                            <td>鲤鱼</td>
+                                            <td>6,000</td>
+                                            <td>2026-03-18</td>
+                                            <td>120</td>
+                                            <td>720</td>
+                                            <td>95%</td>
+                                            <td>5,700</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3号塘口</td>
+                                            <td>鲢鱼</td>
+                                            <td>8,000</td>
+                                            <td>2026-03-20</td>
+                                            <td>100</td>
+                                            <td>800</td>
+                                            <td>94%</td>
+                                            <td>7,520</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>4号塘口</td>
+                                            <td>鲫鱼</td>
+                                            <td>4,500</td>
+                                            <td>2026-04-01</td>
+                                            <td>80</td>
+                                            <td>360</td>
+                                            <td>98%</td>
+                                            <td>4,410</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>5号塘口</td>
+                                            <td>草鱼</td>
+                                            <td>7,200</td>
+                                            <td>2026-04-05</td>
+                                            <td>130</td>
+                                            <td>936</td>
+                                            <td>97%</td>
+                                            <td>6,984</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm">编辑</button>
+                                                <button class="btn btn-danger btn-sm">删除</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="pagination">
+                                <button disabled>上一页</button>
+                                <span class="page-info">第 1 页 / 共 2 页</span>
+                                <button>下一页</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 放养统计 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>放养统计汇总</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon blue">🐟</div>
+                                    <div class="stat-info">
+                                        <h4>总放养量(尾)</h4>
+                                        <div class="value">45,600</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon green">✅</div>
+                                    <div class="stat-info">
+                                        <h4>当前存塘(尾)</h4>
+                                        <div class="value">43,850</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon orange">📊</div>
+                                    <div class="stat-info">
+                                        <h4>平均存活率</h4>
+                                        <div class="value">96.2%</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon blue">⚖️</div>
+                                    <div class="stat-info">
+                                        <h4>总放养重量(kg)</h4>
+                                        <div class="value">5,680</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 新增塘口弹窗 -->
+    <div id="addPondModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>新增塘口</h3>
+                <span class="modal-close" onclick="closeAddPondModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>塘口名称</label>
+                            <input type="text" placeholder="例如：7号塘口">
+                        </div>
+                        <div class="form-group">
+                            <label>面积(亩)</label>
+                            <input type="number" step="0.1" placeholder="请输入面积">
+                        </div>
+                        <div class="form-group">
+                            <label>平均水深(m)</label>
+                            <input type="number" step="0.1" placeholder="请输入水深">
+                        </div>
+                        <div class="form-group">
+                            <label>水源类型</label>
+                            <select>
+                                <option>地下水</option>
+                                <option>河水</option>
+                                <option>水库水</option>
+                                <option>自来水</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>负责人</label>
+                            <input type="text" placeholder="请输入负责人">
+                        </div>
+                        <div class="form-group">
+                            <label>状态</label>
+                            <select>
+                                <option>空闲</option>
+                                <option>使用中</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea rows="3" placeholder="请输入备注信息"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeAddPondModal()">取消</button>
+                <button class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function showAddPondModal() {
+            document.getElementById('addPondModal').classList.add('show');
+        }
+        
+        function closeAddPondModal() {
+            document.getElementById('addPondModal').classList.remove('show');
+        }
+        
+        function showAddSpeciesModal() {
+            alert('新增养殖品种功能（原型演示）');
+        }
+        
+        function showAddStockModal() {
+            alert('新增放养记录功能（原型演示）');
+        }
+    </script>
+</body>
+</html>

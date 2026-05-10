@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水质监测 - 智慧水产养殖系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🐟 智慧水产养殖</h2>
+                <p>管理系统 v1.0</p>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-group">
+                    <div class="menu-group-title">主菜单</div>
+                    <a href="dashboard.html" class="menu-item">
+                        <span>📊</span> 仪表盘
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">基础管理</div>
+                    <a href="warehouse.html" class="menu-item">
+                        <span>📦</span> 仓储管理
+                    </a>
+                    <a href="pond.html" class="menu-item">
+                        <span>🏞️</span> 塘口管理
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">监测监控</div>
+                    <a href="monitoring.html" class="menu-item active">
+                        <span>🔬</span> 水质监测
+                    </a>
+                    <a href="equipment.html" class="menu-item">
+                        <span>⚙️</span> 设备监控
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">业务管理</div>
+                    <a href="feeding.html" class="menu-item">
+                        <span>🍽️</span> 投喂管理
+                    </a>
+                    <a href="alarm.html" class="menu-item">
+                        <span>🚨</span> 报警管理
+                    </a>
+                    <a href="report.html" class="menu-item">
+                        <span>📈</span> 报表统计
+                    </a>
+                </div>
+                
+                <div class="menu-group">
+                    <div class="menu-group-title">系统设置</div>
+                    <a href="user.html" class="menu-item">
+                        <span>👤</span> 用户管理
+                    </a>
+                    <a href="login.html" class="menu-item">
+                        <span>🚪</span> 退出登录
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 头部 -->
+            <header class="header">
+                <div class="header-left">
+                    <h3>水质监测</h3>
+                </div>
+                <div class="header-right">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label>塘口：</label>
+                        <select id="pondSelect" onchange="updateMonitoring()">
+                            <option value="1">1号塘口</option>
+                            <option value="2">2号塘口</option>
+                            <option value="3">3号塘口</option>
+                            <option value="4">4号塘口</option>
+                        </select>
+                    </div>
+                    <div class="notification-bell">
+                        🔔
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar">管</div>
+                        <div>
+                            <div style="font-weight: 500;">管理员</div>
+                            <div style="font-size: 12px; color: #666;">admin</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content">
+                <div class="page-header">
+                    <h1>水质实时监测</h1>
+                    <div class="breadcrumb">首页 / 监测监控 / 水质监测</div>
+                </div>
+
+                <!-- 实时数据 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>实时水质数据</h3>
+                        <div>
+                            <span style="color: #666; font-size: 14px;">更新时间：2026-04-14 09:30:15</span>
+                            <button class="btn btn-primary btn-sm" style="margin-left: 10px;" onclick="refreshData()">🔄 刷新</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="monitor-grid">
+                            <div class="monitor-card success">
+                                <h4>🌡️ 水温</h4>
+                                <div class="monitor-value">24.5</div>
+                                <div class="monitor-unit">°C</div>
+                                <div class="monitor-status">
+                                    <span class="badge badge-success">正常 (20-28°C)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card success">
+                                <h4>💧 pH值</h4>
+                                <div class="monitor-value">7.2</div>
+                                <div class="monitor-unit"></div>
+                                <div class="monitor-status">
+                                    <span class="badge badge-success">正常 (6.5-8.5)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card warning">
+                                <h4>💨 溶解氧</h4>
+                                <div class="monitor-value">4.8</div>
+                                <div class="monitor-unit">mg/L</div>
+                                <div class="monitor-status">
+                                    <span class="badge badge-warning">偏低 (≥5.0)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card success">
+                                <h4>⚗️ 氨氮</h4>
+                                <div class="monitor-value">0.35</div>
+                                <div class="monitor-unit">mg/L</div>
+                                <div class="monitor-status">
+                                    <span class="badge badge-success">正常 (≤0.5)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card success">
+                                <h4>🧪 亚硝酸盐</h4>
+                                <div class="monitor-value">0.08</div>
+                                <div class="monitor-unit">mg/L</div>
+                                <div class="monitor-status">
+                                    <span class="badge badge-success">正常 (≤0.1)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="monitor-card success">
+                                <h4>🔬 透明度</h4>
+                                <div class="monitor-value">35</div>
+                                <div class="monitor-unit">cm</div>
+                                <div class="monitor-status">
+                                    <span class="badge badge-success">正常 (30-40)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 历史数据曲线 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>历史数据趋势</h3>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="metricSelect">
+                                <option value="temperature">水温</option>
+                                <option value="ph">pH值</option>
+                                <option value="do">溶解氧</option>
+                                <option value="nh3">氨氮</option>
+                            </select>
+                            <select id="timeRange">
+                                <option value="24h">最近24小时</option>
+                                <option value="7d">最近7天</option>
+                                <option value="30d">最近30天</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm">查询</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="background: #fafafa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <div style="text-align: center; color: #666;">
+                                <div style="font-size: 60px; margin-bottom: 20px;">📈</div>
+                                <h4>水质数据曲线图</h4>
+                                <p style="margin-top: 10px;">显示水温24小时变化趋势</p>
+                                <div style="margin-top: 20px; padding: 20px; background: white; border-radius: 6px; display: inline-block;">
+                                    <div style="font-size: 12px; color: #999;">模拟数据曲线</div>
+                                    <svg width="600" height="200" viewBox="0 0 600 200" style="margin-top: 10px;">
+                                        <!-- 网格线 -->
+                                        <line x1="50" y1="20" x2="50" y2="180" stroke="#e8e8e8" stroke-width="1"/>
+                                        <line x1="50" y1="180" x2="580" y2="180" stroke="#e8e8e8" stroke-width="1"/>
+                                        <line x1="50" y1="100" x2="580" y2="100" stroke="#e8e8e8" stroke-width="1" stroke-dasharray="5,5"/>
+                                        <line x1="50" y1="60" x2="580" y2="60" stroke="#e8e8e8" stroke-width="1" stroke-dasharray="5,5"/>
+                                        <line x1="50" y1="140" x2="580" y2="140" stroke="#e8e8e8" stroke-width="1" stroke-dasharray="5,5"/>
+                                        
+                                        <!-- Y轴标签 -->
+                                        <text x="40" y="25" font-size="10" fill="#666">28°C</text>
+                                        <text x="40" y="65" font-size="10" fill="#666">26°C</text>
+                                        <text x="40" y="105" font-size="10" fill="#666">24°C</text>
+                                        <text x="40" y="145" font-size="10" fill="#666">22°C</text>
+                                        <text x="40" y="185" font-size="10" fill="#666">20°C</text>
+                                        
+                                        <!-- X轴标签 -->
+                                        <text x="50" y="195" font-size="10" fill="#666">00:00</text>
+                                        <text x="160" y="195" font-size="10" fill="#666">04:00</text>
+                                        <text x="270" y="195" font-size="10" fill="#666">08:00</text>
+                                        <text x="380" y="195" font-size="10" fill="#666">12:00</text>
+                                        <text x="490" y="195" font-size="10" fill="#666">16:00</text>
+                                        <text x="560" y="195" font-size="10" fill="#666">20:00</text>
+                                        
+                                        <!-- 温度曲线 -->
+                                        <polyline 
+                                            points="50,120 100,130 150,125 200,115 250,105 300,95 350,85 400,80 450,90 500,100 550,110 580,115" 
+                                            fill="none" 
+                                            stroke="#1890ff" 
+                                            stroke-width="3"
+                                        />
+                                        
+                                        <!-- 数据点 -->
+                                        <circle cx="50" cy="120" r="4" fill="#1890ff"/>
+                                        <circle cx="150" cy="125" r="4" fill="#1890ff"/>
+                                        <circle cx="250" cy="105" r="4" fill="#1890ff"/>
+                                        <circle cx="350" cy="85" r="4" fill="#1890ff"/>
+                                        <circle cx="450" cy="90" r="4" fill="#1890ff"/>
+                                        <circle cx="550" cy="110" r="4" fill="#1890ff"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 多指标对比 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>各塘口水质对比</h3>
+                        <button class="btn btn-primary btn-sm">导出数据</button>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>塘口</th>
+                                    <th>水温(°C)</th>
+                                    <th>pH值</th>
+                                    <th>溶解氧(mg/L)</th>
+                                    <th>氨氮(mg/L)</th>
+                                    <th>亚硝酸盐(mg/L)</th>
+                                    <th>透明度(cm)</th>
+                                    <th>综合状态</th>
+                                    <th>更新时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>1号塘口</strong></td>
+                                    <td>24.5</td>
+                                    <td>7.2</td>
+                                    <td>5.2</td>
+                                    <td>0.35</td>
+                                    <td>0.08</td>
+                                    <td>35</td>
+                                    <td><span class="badge badge-success">优良</span></td>
+                                    <td>09:30</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>2号塘口</strong></td>
+                                    <td>24.8</td>
+                                    <td>7.5</td>
+                                    <td>5.0</td>
+                                    <td>0.42</td>
+                                    <td>0.09</td>
+                                    <td>32</td>
+                                    <td><span class="badge badge-success">优良</span></td>
+                                    <td>09:30</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>3号塘口</strong></td>
+                                    <td>24.2</td>
+                                    <td>7.0</td>
+                                    <td style="color: #faad14; font-weight: bold;">4.8</td>
+                                    <td>0.38</td>
+                                    <td>0.10</td>
+                                    <td>38</td>
+                                    <td><span class="badge badge-warning">注意</span></td>
+                                    <td>09:30</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>4号塘口</strong></td>
+                                    <td>25.0</td>
+                                    <td>7.3</td>
+                                    <td>5.5</td>
+                                    <td>0.30</td>
+                                    <td>0.07</td>
+                                    <td>36</td>
+                                    <td><span class="badge badge-success">优良</span></td>
+                                    <td>09:30</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 水质标准参考 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>水质标准参考范围</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <strong>提示：</strong>以下为鱼类养殖适宜水质参数范围，超出范围将触发报警
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>指标</th>
+                                    <th>最低值</th>
+                                    <th>最适范围</th>
+                                    <th>最高值</th>
+                                    <th>单位</th>
+                                    <th>说明</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>水温</strong></td>
+                                    <td>18</td>
+                                    <td>22-26</td>
+                                    <td>30</td>
+                                    <td>°C</td>
+                                    <td>不同鱼种略有差异</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>pH值</strong></td>
+                                    <td>6.5</td>
+                                    <td>7.0-8.0</td>
+                                    <td>8.5</td>
+                                    <td>-</td>
+                                    <td>过酸过碱都不利</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>溶解氧</strong></td>
+                                    <td>4.0</td>
+                                    <td>5.0-8.0</td>
+                                    <td>-</td>
+                                    <td>mg/L</td>
+                                    <td>低于4.0会浮头</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>氨氮</strong></td>
+                                    <td>-</td>
+                                    <td>0-0.3</td>
+                                    <td>0.5</td>
+                                    <td>mg/L</td>
+                                    <td>过高会中毒</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>亚硝酸盐</strong></td>
+                                    <td>-</td>
+                                    <td>0-0.05</td>
+                                    <td>0.1</td>
+                                    <td>mg/L</td>
+                                    <td>致癌物质</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function refreshData() {
+            alert('正在获取最新数据...');
+            // 模拟刷新
+            setTimeout(() => {
+                alert('数据已更新！');
+            }, 1000);
+        }
+        
+        function updateMonitoring() {
+            const pond = document.getElementById('pondSelect').value;
+            console.log('切换到塘口:', pond);
+            // 实际应用中这里会加载对应塘口的数据
+        }
+    </script>
+</body>
+</html>
