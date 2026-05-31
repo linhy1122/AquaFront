@@ -5,65 +5,83 @@
       <router-link to="/equipment" class="btn btn-primary btn-sm">查看详情</router-link>
     </div>
     <div class="card-body">
-      <div class="equipment-grid">
-        <div class="equipment-card">
+      <div v-if="error" class="alert alert-danger">
+        {{ error }}
+        <button class="btn btn-primary btn-sm" style="margin-left: 8px;" @click="refreshLatest">重试</button>
+      </div>
+
+      <div v-if="loading && latestList.length === 0" class="empty-state">正在加载设备模拟数据…</div>
+
+      <div v-else class="equipment-grid">
+        <div v-for="item in previewList" :key="item.deviceId" class="equipment-card">
           <div class="equipment-header">
-            <h4>⚡ 1号增氧机</h4>
-            <span class="badge badge-success">运行中</span>
+            <h4>{{ getDeviceTypeLabel(item.deviceType) }} · {{ item.deviceName }}</h4>
+            <span :class="['badge', getDeviceStatusBadge(item.status)]">
+              {{ getDeviceStatusLabel(item.status) }}
+            </span>
           </div>
           <div class="equipment-status">
-            <span class="status-dot online"></span>
-            <span>在线</span>
+            <span class="status-dot" :class="item.status === 'on' ? 'online' : item.status === 'error' ? 'warning' : 'offline'"></span>
+            <span>{{ item.pondName || `塘口 ${item.pondId}` }}</span>
           </div>
-          <div>运行时间：8小时30分</div>
-          <div style="margin-top: 10px;">
-            <label class="switch">
-              <input type="checkbox" checked>
-              <span class="slider"></span>
-            </label>
+          <div>运行时长：{{ formatDeviceRuntime(item.runtimeMinutes) }}</div>
+          <div>
+            {{ runtimeLabel(item.deviceType) }}：{{ formatDeviceNumber(getMetricValue(item), 2) }}
+            {{ runtimeUnit(item.deviceType) }}
           </div>
         </div>
 
-        <div class="equipment-card">
-          <div class="equipment-header">
-            <h4>⚡ 2号增氧机</h4>
-            <span class="badge badge-info">待机</span>
-          </div>
-          <div class="equipment-status">
-            <span class="status-dot online"></span>
-            <span>在线</span>
-          </div>
-          <div>上次运行：昨天 14:20</div>
-          <div style="margin-top: 10px;">
-            <label class="switch">
-              <input type="checkbox">
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <div class="equipment-card">
-          <div class="equipment-header">
-            <h4>💧 1号水泵</h4>
-            <span class="badge badge-success">运行中</span>
-          </div>
-          <div class="equipment-status">
-            <span class="status-dot online"></span>
-            <span>在线</span>
-          </div>
-          <div>运行时间：3小时15分</div>
-          <div style="margin-top: 10px;">
-            <label class="switch">
-              <input type="checkbox" checked>
-              <span class="slider"></span>
-            </label>
-          </div>
-        </div>
+        <div v-if="previewList.length === 0" class="empty-state">暂无设备数据</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useDeviceRealtime } from '@/composables/useDeviceRealtime'
+import {
+  DEVICE_RUNTIME_LABELS,
+  formatDeviceNumber,
+  formatDeviceRuntime,
+  getDeviceStatusBadge,
+  getDeviceStatusLabel,
+  getDeviceTypeLabel
+} from '@/constants/device'
+
 defineOptions({ name: 'EquipmentCard' })
+
+const { latestList, loading, error, refreshLatest } = useDeviceRealtime()
+
+const previewList = computed(() => (latestList.value || []).slice(0, 4))
+
+const runtimeLabel = deviceType => DEVICE_RUNTIME_LABELS[deviceType] || '指标'
+
+const runtimeUnit = deviceType => {
+  if (deviceType === 'pump') {
+    return 'm³/h'
+  }
+  if (deviceType === 'feeder') {
+    return 'kg/h'
+  }
+  return 'kW'
+}
+
+const getMetricValue = item => {
+  if (item.deviceType === 'pump') {
+    return item.flowRate
+  }
+  if (item.deviceType === 'feeder') {
+    return item.flowRate
+  }
+  return item.powerKw
+}
 </script>
+
+<style scoped>
+.empty-state {
+  padding: 20px 0;
+  color: #888;
+  text-align: center;
+}
+</style>
