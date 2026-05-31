@@ -9,10 +9,10 @@
         <span class="notification-badge">3</span>
       </div>
       <div class="user-info">
-        <div class="user-avatar">管</div>
+        <div class="user-avatar">{{ avatarText }}</div>
         <div>
-          <div style="font-weight: 500;">管理员</div>
-          <div style="font-size: 12px; color: #666;">admin</div>
+          <div style="font-weight: 500;">{{ displayRoleLabel }}</div>
+          <div style="font-size: 12px; color: #666;">{{ displayUsername }}</div>
         </div>
       </div>
     </div>
@@ -20,10 +20,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useCurrentUser, loadCurrentUser } from '@/composables/useCurrentUser'
 
 const route = useRoute()
+const { currentUser } = useCurrentUser()
 
 const pageTitle = computed(() => {
   const titles = {
@@ -38,5 +40,28 @@ const pageTitle = computed(() => {
     user: '用户管理'
   }
   return titles[route.name] || '智慧水产养殖系统'
+})
+
+const displayUsername = computed(() => {
+  return currentUser.value?.username || localStorage.getItem('username') || '未登录'
+})
+
+const displayRole = computed(() => {
+  return currentUser.value?.role || localStorage.getItem('role') || 'USER'
+})
+
+const displayRoleLabel = computed(() => {
+  return displayRole.value === 'ADMIN' ? '管理员' : '普通用户'
+})
+
+const avatarText = computed(() => {
+  const name = displayUsername.value || 'U'
+  return name.slice(0, 1).toUpperCase()
+})
+
+const showAlarmModal = ref(false)
+
+onMounted(() => {
+  loadCurrentUser(true)
 })
 </script>

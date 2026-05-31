@@ -24,7 +24,12 @@ request.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
     }
-    return Promise.reject(error.response?.data || { message: error.message })
+    const responseData = error.response?.data || {}
+    return Promise.reject({
+      ...responseData,
+      status: error.response?.status,
+      message: responseData.message || error.message || 'Request failed'
+    })
   }
 )
 
