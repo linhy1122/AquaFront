@@ -9,7 +9,7 @@
         <div class="search-box">
           <select v-model="pondFilter.pondId" @change="fetchStockRecords">
             <option value="">全部塘口</option>
-            <option v-for="p in pondList" :key="p.pondId" :value="p.pondId">{{ p.name }}</option>
+            <option v-for="p in pondList" :key="p.pondId" :value="p.pondId">{{ displayPond(p) }}</option>
           </select>
           <select v-model="pondFilter.species" @change="fetchStockRecords">
             <option value="">全部品种</option>
@@ -39,7 +39,7 @@
               <td colspan="9" style="text-align:center;padding:40px;color:#999;">暂无放养记录数据</td>
             </tr>
             <tr v-for="item in stockRecords" :key="item.batchId">
-              <td>{{ item.pondName || '--' }}</td>
+              <td>{{ displayPond(item) }}</td>
               <td>{{ item.species }}</td>
               <td>{{ item.stockCount?.toLocaleString() }}</td>
               <td>{{ item.stockDate }}</td>
@@ -57,7 +57,7 @@
           </tbody>
         </table>
       </div>
-      
+
       <div class="pagination" v-if="stkTotal > 0">
         <button :disabled="stkPage <= 1" @click="stkPage--; fetchStockRecords()">上一页</button>
         <span class="page-info">第 {{ stkPage }} / {{ stkTotalPages }} 页，共 {{ stkTotal }} 条</span>
@@ -112,18 +112,21 @@
         <span class="modal-close" @click="closeDialog">&times;</span>
       </div>
       <div class="modal-body">
+        <div v-if="!isEdit && form.pondId && !activeBatchForPond" class="alert alert-warning">
+          当前塘口没有活跃养殖批次，请先去"养殖品种记录"新增品种后再来添加放养记录。
+        </div>
         <div class="form-grid">
           <div class="form-group">
-            <label>塘口 ID <span style="color:red">*</span></label>
-            <input type="number" v-model.number="form.pondId" placeholder="请输入塘口ID">
-          </div>
-          <div class="form-group">
-            <label>品种 ID</label>
-            <input type="number" v-model.number="form.breedId" placeholder="选填">
+            <label>塘口 <span style="color:red">*</span></label>
+            <select v-model.number="form.pondId" @change="onPondChange" :disabled="isEdit">
+              <option value="">请选择塘口</option>
+              <option v-for="p in pondList" :key="p.pondId" :value="p.pondId">{{ displayPond(p) }}</option>
+            </select>
           </div>
           <div class="form-group">
             <label>品种名称 <span style="color:red">*</span></label>
             <input type="text" v-model="form.species" placeholder="请输入品种名称">
+            <button v-if="!isEdit && activeBatchForPond" class="btn btn-link btn-sm" @click="fillFromBatch" style="padding:0;margin-top:4px;">从活跃批次填充</button>
           </div>
           <div class="form-group">
             <label>放养数量(尾) <span style="color:red">*</span></label>
@@ -155,28 +158,37 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="btn" @click="closeDialog">取消</button>
-        <button class="btn btn-primary" @click="handleSubmit" :disabled="submitting">
-          {{ submitting ? '提交中...' : '确认' }}
-        </button>
+      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <button v-if="!isEdit && lastRecord" class="btn btn-default btn-sm" @click="copyLastRecord">复制上次记录</button>
+        </div>
+        <div>
+          <button class="btn" @click="closeDialog">取消</button>
+          <button class="btn btn-primary" @click="handleSubmit" :disabled="submitting">
+            {{ submitting ? '提交中...' : '确认' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { stockingApi, statisticApi, pondApi } from '../api'
 
 defineOptions({ name: 'PondStockTab' })
 
-// --- 放养记录列表 ---
+const props = defineProps({
+  preSelectedPondId: { type: Number, default: null }
+})
+
 const stkPage = ref(1)
 const stkSize = ref(10)
 const stkTotal = ref(0)
 const stockRecords = ref([])
 const submitting = ref(false)
+const allRecords = ref([])
 
 const speciesList = ['南美白对虾', '草鱼', '鲤鱼', '鲢鱼', '鲫鱼', '罗非鱼']
 const pondList = ref([])
@@ -187,6 +199,12 @@ const pondFilter = reactive({
 })
 
 const stkTotalPages = computed(() => Math.ceil(stkTotal.value / stkSize.value) || 1)
+
+function displayPond(item) {
+  if (item.pondCode && item.pondName) return `${item.pondCode} ${item.pondName}`
+  if (item.pondName) return item.pondName
+  return `塘口 ${item.pondId}`
+}
 
 const stkStatusBadge = (status) => {
   const map = { active: 'badge-success', completed: 'badge-info', deleted: 'badge-danger' }
@@ -217,7 +235,6 @@ const fetchStockRecords = async () => {
     }
     if (pondFilter.pondId) params.pondId = pondFilter.pondId
     if (pondFilter.species) params.species = pondFilter.species
-
     const res = await stockingApi.listByPond(params)
     if (res.success) {
       stockRecords.value = res.data.records || []
@@ -228,7 +245,6 @@ const fetchStockRecords = async () => {
   }
 }
 
-// --- 放养统计 ---
 const stockingStat = ref({})
 
 const fetchStockingStat = async () => {
@@ -242,14 +258,12 @@ const fetchStockingStat = async () => {
   }
 }
 
-// --- 弹窗新增/编辑 ---
 const showDialog = ref(false)
 const isEdit = ref(false)
 
 const createDefaultForm = () => ({
   batchId: null,
-  pondId: null,
-  breedId: null,
+  pondId: '',
   species: '',
   stockCount: null,
   currentNum: null,
@@ -261,10 +275,19 @@ const createDefaultForm = () => ({
 
 const form = reactive(createDefaultForm())
 
+const lastRecord = computed(() => {
+  if (!stockRecords.value.length) return null
+  return stockRecords.value[0]
+})
+
+const activeBatchForPond = computed(() => {
+  if (!form.pondId) return null
+  return stockRecords.value.find(r => r.pondId === form.pondId && r.status === 'active') || null
+})
+
 const resetForm = () => {
   form.batchId = null
-  form.pondId = null
-  form.breedId = null
+  form.pondId = ''
   form.species = ''
   form.stockCount = null
   form.currentNum = null
@@ -274,9 +297,44 @@ const resetForm = () => {
   form.status = 'active'
 }
 
+const onPondChange = () => {
+  if (!form.pondId) return
+  const batch = activeBatchForPond.value
+  if (batch) {
+    fillFromBatch()
+  } else {
+    form.species = ''
+    form.stockDate = ''
+    form.currentNum = null
+    form.avgSpec = null
+    form.survivalRate = null
+  }
+}
+
+const fillFromBatch = () => {
+  const batch = activeBatchForPond.value
+  if (!batch) return
+  form.species = batch.species || form.species
+  form.currentNum = batch.currentNum || null
+  form.avgSpec = batch.avgSpec || null
+  form.survivalRate = batch.survivalRate || null
+}
+
+const copyLastRecord = () => {
+  if (!lastRecord.value) return
+  form.species = lastRecord.value.species
+  form.stockCount = lastRecord.value.stockCount
+  form.currentNum = lastRecord.value.currentNum || null
+  form.avgSpec = lastRecord.value.avgSpec || null
+  form.survivalRate = lastRecord.value.survivalRate || null
+}
+
 const openAddDialog = () => {
   isEdit.value = false
   resetForm()
+  if (props.preSelectedPondId) {
+    form.pondId = props.preSelectedPondId
+  }
   showDialog.value = true
 }
 
@@ -284,7 +342,6 @@ const openEditDialog = (item) => {
   isEdit.value = true
   form.batchId = item.batchId
   form.pondId = item.pondId
-  form.breedId = item.breedId || null
   form.species = item.species
   form.stockCount = item.stockCount
   form.currentNum = item.currentNum || null
@@ -299,29 +356,28 @@ const closeDialog = () => {
   showDialog.value = false
 }
 
-const buildPayload = () => {
-  const payload = {
-    pondId: form.pondId,
-    species: form.species,
-    stockCount: form.stockCount,
-    stockDate: form.stockDate
-  }
-  if (form.breedId) payload.breedId = form.breedId
-  if (form.currentNum !== null && form.currentNum !== undefined) payload.currentNum = form.currentNum
-  if (form.avgSpec !== null && form.avgSpec !== undefined) payload.avgSpec = form.avgSpec
-  if (form.survivalRate !== null && form.survivalRate !== undefined) payload.survivalRate = form.survivalRate
-  if (form.status) payload.status = form.status
-  return payload
-}
-
 const handleSubmit = async () => {
   if (!form.pondId || !form.species || !form.stockCount || !form.stockDate) {
-    alert('请填写所有必填字段（塘口ID、品种名称、放养数量、放养日期）')
+    alert('请填写所有必填字段（塘口、品种名称、放养数量、放养日期）')
+    return
+  }
+  if (form.stockCount < 1) {
+    alert('放养数量必须大于0')
     return
   }
   submitting.value = true
   try {
-    const payload = buildPayload()
+    const payload = {
+      pondId: form.pondId,
+      species: form.species,
+      stockCount: form.stockCount,
+      stockDate: form.stockDate
+    }
+    if (form.currentNum !== null && form.currentNum !== undefined) payload.currentNum = form.currentNum
+    if (form.avgSpec !== null && form.avgSpec !== undefined) payload.avgSpec = form.avgSpec
+    if (form.survivalRate !== null && form.survivalRate !== undefined) payload.survivalRate = form.survivalRate
+    if (form.status) payload.status = form.status
+
     let res
     if (isEdit.value) {
       payload.batchId = form.batchId
@@ -358,6 +414,12 @@ const handleDelete = async (batchId) => {
     alert('删除失败: ' + (err.message || '未知错误'))
   }
 }
+
+watch(() => props.preSelectedPondId, (val) => {
+  if (val && !showDialog.value) {
+    form.pondId = val
+  }
+})
 
 onMounted(() => {
   fetchPondList()

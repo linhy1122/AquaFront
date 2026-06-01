@@ -16,10 +16,16 @@
     <PondBasicTab v-if="activeTab === 'basic'" />
 
     <!-- 养殖品种记录 -->
-    <PondSpeciesTab v-if="activeTab === 'species'" />
+    <PondSpeciesTab
+      v-if="activeTab === 'species'"
+      @navigate-stock="onNavigateStock"
+    />
 
     <!-- 放养数量记录 -->
-    <PondStockTab v-if="activeTab === 'stock'" />
+    <PondStockTab
+      v-if="activeTab === 'stock'"
+      :pre-selected-pond-id="pendingPondId"
+    />
   </div>
 </template>
 
@@ -30,9 +36,14 @@ import PondSpeciesTab from '../components/PondSpeciesTab.vue'
 import PondStockTab from '../components/PondStockTab.vue'
 
 const activeTab = ref('basic')
+const pendingPondId = ref(null)
 
 const switchTab = (tabName) => {
   activeTab.value = tabName
 }
-</script>
 
+const onNavigateStock = (pondId) => {
+  pendingPondId.value = pondId
+  activeTab.value = 'stock'
+}
+</script>

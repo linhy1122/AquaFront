@@ -9,7 +9,7 @@
         <div class="search-box">
           <select v-model="searchPondId" @change="fetchRecords">
             <option value="">全部塘口</option>
-            <option v-for="p in pondList" :key="p.pondId" :value="p.pondId">{{ p.name }}</option>
+            <option v-for="p in pondList" :key="p.pondId" :value="p.pondId">{{ displayPondLabel(p) }}</option>
           </select>
           <input type="text" v-model="searchSpecies" placeholder="搜索品种名称..." @keyup.enter="fetchRecords">
           <button class="btn btn-primary btn-sm" @click="fetchRecords">查询</button>
@@ -35,7 +35,7 @@
               <td colspan="8" style="text-align:center;padding:40px;color:#999;">暂无养殖品种记录</td>
             </tr>
             <tr v-for="item in records" :key="item.batchId">
-              <td>{{ item.pondName || '--' }}</td>
+              <td>{{ displayPondLabel(item) }}</td>
               <td><strong>{{ item.species }}</strong></td>
               <td>{{ item.stockCount?.toLocaleString() }}</td>
               <td>{{ item.stockDate }}</td>
@@ -46,6 +46,7 @@
               </td>
               <td>
                 <button class="btn btn-primary btn-sm" @click="openEditDialog(item)">编辑</button>
+                <button class="btn btn-success btn-sm" @click="quickAddStock(item)">+放养</button>
                 <button class="btn btn-danger btn-sm" @click="handleDelete(item.batchId)">删除</button>
               </td>
             </tr>
@@ -72,9 +73,9 @@
         <div class="form-grid">
           <div class="form-group">
             <label>塘口 <span style="color:red">*</span></label>
-            <select v-model.number="form.pondId">
+            <select v-model.number="form.pondId" @change="onPondChange">
               <option value="">请选择塘口</option>
-              <option v-for="p in pondList" :key="p.pondId" :value="p.pondId">{{ p.name }}</option>
+              <option v-for="p in pondList" :key="p.pondId" :value="p.pondId">{{ displayPondLabel(p) }}</option>
             </select>
           </div>
           <div class="form-group">
@@ -102,10 +103,6 @@
             <input type="number" v-model.number="form.survivalRate" min="0" max="100" step="0.1" placeholder="0-100">
           </div>
           <div class="form-group">
-            <label>品种 ID</label>
-            <input type="number" v-model.number="form.breedId" placeholder="选填">
-          </div>
-          <div class="form-group">
             <label>状态</label>
             <select v-model="form.status">
               <option value="active">正常</option>
@@ -131,7 +128,8 @@ import { stockingApi, pondApi } from '../api'
 
 defineOptions({ name: 'PondSpeciesTab' })
 
-// --- 列表 ---
+const emit = defineEmits(['navigate-stock'])
+
 const page = ref(1)
 const size = ref(10)
 const total = ref(0)
@@ -142,6 +140,13 @@ const searchSpecies = ref('')
 const pondList = ref([])
 
 const totalPages = computed(() => Math.ceil(total.value / size.value) || 1)
+
+function displayPondLabel(item) {
+  if (item.pondCode && item.pondName) return `${item.pondCode} ${item.pondName}`
+  if (item.pondName) return item.pondName
+  if (item.name) return item.name
+  return `塘口 ${item.pondId}`
+}
 
 const statusBadge = (status) => {
   const map = { active: 'badge-success', completed: 'badge-info', deleted: 'badge-danger' }
@@ -176,17 +181,13 @@ const fetchRecords = async () => {
     if (searchSpecies.value && searchSpecies.value.trim() !== '') {
       params.species = searchSpecies.value.trim()
     }
-
     const res = await stockingApi.listByPond(params)
     if (res.success) {
       records.value = res.data.records || []
       total.value = res.data.total || 0
-    } else {
-      console.warn('后端返回失败:', res.message)
     }
   } catch (err) {
     console.error('获取养殖品种记录失败:', err)
-    console.error('请求参数:', JSON.stringify(params))
   }
 }
 
@@ -195,7 +196,10 @@ const changePage = (p) => {
   fetchRecords()
 }
 
-// --- 弹窗 ---
+const quickAddStock = (item) => {
+  emit('navigate-stock', item.pondId)
+}
+
 const showDialog = ref(false)
 const isEdit = ref(false)
 
@@ -207,7 +211,6 @@ const form = reactive({
   currentNum: null,
   avgSpec: null,
   survivalRate: null,
-  breedId: null,
   stockDate: '',
   status: 'active'
 })
@@ -220,9 +223,11 @@ const resetForm = () => {
   form.currentNum = null
   form.avgSpec = null
   form.survivalRate = null
-  form.breedId = null
   form.stockDate = ''
   form.status = 'active'
+}
+
+const onPondChange = () => {
 }
 
 const openAddDialog = () => {
@@ -240,7 +245,6 @@ const openEditDialog = (item) => {
   form.currentNum = item.currentNum || null
   form.avgSpec = item.avgSpec || null
   form.survivalRate = item.survivalRate || null
-  form.breedId = item.breedId || null
   form.stockDate = item.stockDate
   form.status = item.status || 'active'
   showDialog.value = true
@@ -266,7 +270,6 @@ const handleSubmit = async () => {
     if (form.currentNum !== null && form.currentNum !== undefined) payload.currentNum = form.currentNum
     if (form.avgSpec !== null && form.avgSpec !== undefined) payload.avgSpec = form.avgSpec
     if (form.survivalRate !== null && form.survivalRate !== undefined) payload.survivalRate = form.survivalRate
-    if (form.breedId) payload.breedId = form.breedId
     if (form.status) payload.status = form.status
 
     let res
