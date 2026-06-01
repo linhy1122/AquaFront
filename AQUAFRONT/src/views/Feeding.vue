@@ -13,13 +13,13 @@
     </div>
 
     <!-- 投喂记录 -->
-    <FeedingRecordsTab v-show="activeTab === 'records'" />
+    <FeedingRecordsTab v-if="activeTab === 'records'" />
 
     <!-- 投喂计划 -->
-    <FeedingPlanTab v-show="activeTab === 'plan'" />
+    <FeedingPlanTab v-if="activeTab === 'plan'" />
 
     <!-- 投喂统计 -->
-    <FeedingStatsTab v-show="activeTab === 'statistics'" />
+    <FeedingStatsTab v-if="activeTab === 'statistics'" />
   </div>
 </template>
 

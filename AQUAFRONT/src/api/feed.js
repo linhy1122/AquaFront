@@ -16,5 +16,5 @@ export const feedApi = {
   // 出入库流水明细
   records(params) {
     return request.get('/api/feed/records', { params })
-  }
+  },
 }

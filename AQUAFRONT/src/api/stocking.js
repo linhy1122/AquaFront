@@ -20,5 +20,5 @@ export const stockingApi = {
   // 删除放养记录
   delete(batchId) {
     return request.delete(`/api/stocking/delete/${batchId}`)
-  }
+  },
 }

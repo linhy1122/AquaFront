@@ -13,13 +13,13 @@
     </div>
 
     <!-- 日报表 -->
-    <DailyReportTab v-show="activeTab === 'daily'" />
+    <DailyReportTab v-if="activeTab === 'daily'" />
 
     <!-- 月报表 -->
-    <MonthlyReportTab v-show="activeTab === 'monthly'" />
+    <MonthlyReportTab v-if="activeTab === 'monthly'" />
 
     <!-- 数据分析 -->
-    <AnalysisTab v-show="activeTab === 'analysis'" />
+    <AnalysisTab v-if="activeTab === 'analysis'" />
   </div>
 </template>
 

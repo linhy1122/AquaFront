@@ -20,10 +20,6 @@ export const authApi = {
     return request.post('/api/auth/register', data)
   },
 
-  createUser(data) {
-    return request.post('/api/admin/users', data)
-  },
-
   getCurrentUser() {
     return request.get('/api/auth/me')
   },

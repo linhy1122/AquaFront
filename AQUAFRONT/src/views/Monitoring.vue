@@ -54,36 +54,35 @@
 
     <div class="card">
       <div class="card-header">
-        <h3>最近监测历史</h3>
-        <button class="btn btn-primary btn-sm" :disabled="!selectedPond" @click="refreshHistory">刷新历史</button>
+        <h3>水质历史趋势</h3>
+        <div class="header-actions">
+          <div class="time-range-group">
+            <button
+              v-for="opt in timeRangeOptions"
+              :key="opt.value"
+              :class="['btn btn-sm', timeRange === opt.value ? 'btn-primary' : 'btn-default']"
+              @click="setTimeRange(opt.value)"
+            >{{ opt.label }}</button>
+          </div>
+          <button class="btn btn-primary btn-sm" :disabled="!selectedPond" @click="refreshHistory">刷新</button>
+        </div>
       </div>
       <div class="card-body">
         <div v-if="historyError" class="alert alert-danger">{{ historyError }}</div>
-        <div v-if="historyLoading && historyRecords.length === 0" class="empty-state">正在加载历史数据…</div>
+        <div v-else-if="historyLoading && historyRecords.length === 0" class="empty-state">正在加载历史数据…</div>
         <div v-else-if="historyRecords.length === 0" class="empty-state">暂无历史记录</div>
-        <div v-else class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>时间</th>
-                <th v-for="metric in metrics" :key="metric.key">{{ metric.label }}</th>
-                <th>综合状态</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in historyRecords" :key="`${item.pondId}-${item.recordedAt}`">
-                <td>{{ formatWaterQualityTime(item.recordedAt) }}</td>
-                <td v-for="metric in metrics" :key="metric.key">
-                  {{ formatWaterQualityValue(metric, item[metric.key]) }}
-                </td>
-                <td>
-                  <span :class="['badge', getStatusClass(getOverallWaterQualityStatus(item))]">
-                    {{ getStatusLabel(getOverallWaterQualityStatus(item)) }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div v-else>
+          <WaterQualitySummaryBar
+            :pond-name="selectedPond ? (selectedPond.pondName || `塘口 ${selectedPond.pondId}`) : ''"
+            :record="selectedPond"
+            :last-updated-at="lastUpdatedAt"
+            :loading="historyLoading"
+          />
+          <WaterQualityHistoryTrendChart
+            :records="historyRecords"
+            :loading="historyLoading"
+            :error="historyError"
+          />
         </div>
       </div>
     </div>
@@ -97,13 +96,14 @@
 import { computed, ref, watch } from 'vue'
 import ComparisonTable from '../components/ComparisonTable.vue'
 import WaterStandardTable from '../components/WaterStandardTable.vue'
+import WaterQualityHistoryTrendChart from '../components/WaterQualityHistoryTrendChart.vue'
+import WaterQualitySummaryBar from '../components/WaterQualitySummaryBar.vue'
 import { useWaterQuality } from '@/composables/useWaterQuality'
 import {
   WATER_QUALITY_METRICS,
   formatWaterQualityTime,
   formatWaterQualityValue,
   getMetricStatus,
-  getOverallWaterQualityStatus,
   getStatusClass,
   getStatusLabel,
   metricThresholdText
@@ -122,6 +122,19 @@ const {
 } = useWaterQuality()
 
 const selectedPondId = ref(null)
+const timeRange = ref(30)
+
+const timeRangeOptions = [
+  { value: 10, label: '近10条' },
+  { value: 30, label: '近30条' }
+]
+
+function setTimeRange(val) {
+  timeRange.value = val
+  if (selectedPondId.value) {
+    loadHistory(selectedPondId.value, val)
+  }
+}
 
 watch(
   latestList,
@@ -142,7 +155,7 @@ watch(
   selectedPondId,
   pondId => {
     if (pondId) {
-      loadHistory(pondId)
+      loadHistory(pondId, timeRange.value)
     }
   },
   { immediate: true }
@@ -152,7 +165,7 @@ watch(
   lastUpdatedAt,
   () => {
     if (selectedPondId.value) {
-      loadHistory(selectedPondId.value)
+      loadHistory(selectedPondId.value, timeRange.value)
     }
   }
 )
@@ -183,7 +196,7 @@ const metrics = computed(() => {
 
 const refreshHistory = () => {
   if (selectedPondId.value) {
-    loadHistory(selectedPondId.value)
+    loadHistory(selectedPondId.value, timeRange.value)
   }
 }
 
@@ -242,5 +255,21 @@ const refreshPage = () => {
   padding: 28px 16px;
   text-align: center;
   color: #888;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-range-group {
+  display: flex;
+  gap: 4px;
+}
+
+.time-range-group .btn {
+  font-size: 12px;
+  padding: 3px 10px;
 }
 </style>

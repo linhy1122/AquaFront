@@ -1,6 +1,3 @@
-We need to apply the suggested edit to the original code. The original code had a comment with a garbled character: "<!-- 标签�?-->". The suggested edit replaces it with "<!-- 标签切换 -->" and also changes the tab class binding from hardcoded "tab active" to dynamic binding using :class. The rest remains the same. Output the complete modified file.
-
-So we output the full template and script as shown in the suggested edit.```
 <template>
   <div class="content">
     <div class="page-header">
@@ -16,13 +13,13 @@ So we output the full template and script as shown in the suggested edit.```
     </div>
 
     <!-- 塘口基本信息 -->
-    <PondBasicTab v-show="activeTab === 'basic'" />
+    <PondBasicTab v-if="activeTab === 'basic'" />
 
     <!-- 养殖品种记录 -->
-    <PondSpeciesTab v-show="activeTab === 'species'" />
+    <PondSpeciesTab v-if="activeTab === 'species'" />
 
     <!-- 放养数量记录 -->
-    <PondStockTab v-show="activeTab === 'stock'" />
+    <PondStockTab v-if="activeTab === 'stock'" />
   </div>
 </template>
 

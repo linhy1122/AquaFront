@@ -13,13 +13,13 @@
     </div>
 
     <!-- 阈值设置 -->
-    <ThresholdTab v-show="activeTab === 'threshold'" />
+    <ThresholdTab v-if="activeTab === 'threshold'" />
 
     <!-- 报警记录 -->
-    <AlarmRecordsTab v-show="activeTab === 'records'" />
+    <AlarmRecordsTab v-if="activeTab === 'records'" />
 
     <!-- 报警设置 -->
-    <AlarmSettingsTab v-show="activeTab === 'settings'" />
+    <AlarmSettingsTab v-if="activeTab === 'settings'" />
   </div>
 </template>
 

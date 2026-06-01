@@ -147,7 +147,7 @@
                 placeholder="请输入密码（6-100个字符）"
               >
             </div>
-            <div class="form-group">
+            <div v-if="isEdit" class="form-group">
               <label>角色</label>
               <select v-model="formData.role">
                 <option value="USER">普通用户</option>
@@ -349,8 +349,10 @@ const submitUser = async () => {
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      role: formData.role,
       enabled: formData.enabled
+    }
+    if (isEdit.value) {
+      payload.role = formData.role
     }
 
     const res = isEdit.value
