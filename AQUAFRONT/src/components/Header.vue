@@ -74,7 +74,7 @@ const avatarText = computed(() => {
 onMounted(() => {
   loadCurrentUser(true)
   loadAlarmCount()
-  alarmTimer = setInterval(loadAlarmCount, 15000)
+  alarmTimer = setInterval(loadAlarmCount, 30000)
 })
 
 onBeforeUnmount(() => {

@@ -50,7 +50,7 @@ async function loadRecent() {
   finally { loading.value = false }
 }
 
-onMounted(() => { loadRecent(); timer = setInterval(loadRecent, 15000) })
+onMounted(() => { loadRecent(); timer = setInterval(loadRecent, 30000) })
 onBeforeUnmount(() => { clearInterval(timer) })
 </script>
 

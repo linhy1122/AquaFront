@@ -1,7 +1,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive } from 'vue'
 import { waterQualityApi } from '@/api/waterQuality'
 
-const POLL_INTERVAL = 10000
+const POLL_INTERVAL = 30000
 
 const state = reactive({
   latestList: [],

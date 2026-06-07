@@ -11,7 +11,7 @@
         <div class="stat-info">
           <h4>设备总数</h4>
           <div class="value">{{ realtimeSummary.total }}</div>
-          <div class="trend trend-up">10秒自动刷新</div>
+          <div class="trend trend-up">30秒自动刷新</div>
         </div>
       </div>
       <div class="stat-card">
