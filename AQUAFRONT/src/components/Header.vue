@@ -4,9 +4,9 @@
       <h3>{{ pageTitle }}</h3>
     </div>
     <div class="header-right">
-      <div class="notification-bell" @click="showAlarmModal = true">
+      <div class="notification-bell" @click="router.push('/alarm')">
         🔔
-        <span class="notification-badge">3</span>
+        <span v-if="alarmCount > 0" class="notification-badge">{{ alarmCount > 99 ? '99+' : alarmCount }}</span>
       </div>
       <div class="user-info">
         <div class="user-avatar">{{ avatarText }}</div>
@@ -20,12 +20,24 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useCurrentUser, loadCurrentUser } from '@/composables/useCurrentUser'
+import { alarmApi } from '@/api/alarm'
 
 const route = useRoute()
+const router = useRouter()
 const { currentUser } = useCurrentUser()
+
+const alarmCount = ref(0)
+let alarmTimer = null
+
+async function loadAlarmCount() {
+  try {
+    const res = await alarmApi.getOverview()
+    if (res.success) alarmCount.value = res.data.overview?.activeAlarms || 0
+  } catch {}
+}
 
 const pageTitle = computed(() => {
   const titles = {
@@ -59,9 +71,13 @@ const avatarText = computed(() => {
   return name.slice(0, 1).toUpperCase()
 })
 
-const showAlarmModal = ref(false)
-
 onMounted(() => {
   loadCurrentUser(true)
+  loadAlarmCount()
+  alarmTimer = setInterval(loadAlarmCount, 15000)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(alarmTimer)
 })
 </script>

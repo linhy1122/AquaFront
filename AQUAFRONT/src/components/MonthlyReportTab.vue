@@ -68,20 +68,31 @@ const rankChartRef = ref(null)
 const costTrendRef = ref(null)
 let trendChart = null, rankChart = null, costTrendChart = null
 let resizeObs = null
+let isActive = false
+
+const chartRefs = () => [trendChartRef, rankChartRef, costTrendRef]
 
 function initAll() {
   trendChart = echarts.init(trendChartRef.value)
   rankChart = echarts.init(rankChartRef.value)
   costTrendChart = echarts.init(costTrendRef.value)
-  const targets = [trendChartRef, rankChartRef, costTrendRef]
-  resizeObs = new ResizeObserver(() => targets.forEach(t => t.value && echarts.getInstanceByDom(t.value)?.resize()))
-  targets.forEach(t => resizeObs.observe(t.value))
+  const refs = chartRefs()
+  resizeObs = new ResizeObserver(() => refs.forEach(r => r.value && echarts.getInstanceByDom(r.value)?.resize()))
+  refs.forEach(r => resizeObs.observe(r.value))
 }
 
 function renderCharts() {
   if (!report.value) return
   nextTick(() => {
-    if (!trendChart) initAll()
+    if (!isActive) return
+    if (!trendChart) {
+      const refs = chartRefs()
+      if (!refs.every(r => r.value && r.value.isConnected && r.value.clientWidth > 0 && r.value.clientHeight > 0)) {
+        requestAnimationFrame(() => { if (isActive) renderCharts() })
+        return
+      }
+      initAll()
+    }
 
     if (report.value.dailyFeedTrend?.length) {
       trendChart?.setOption({
@@ -134,7 +145,7 @@ async function loadReport() {
   loading.value = true; error.value = ''
   try {
     const res = await reportApi.getMonthly({ month: reportMonth.value, pondId: filterPondId.value || undefined })
-    if (res.success) { report.value = res.data?.report || null; renderCharts() }
+    if (res.success) { report.value = res.data?.report || null; if (isActive) renderCharts() }
     else { error.value = res.message || '加载失败' }
   } catch (e) { error.value = e?.message || '加载失败' }
   finally { loading.value = false }
@@ -147,8 +158,9 @@ async function loadPonds() {
   } catch {}
 }
 
-onMounted(() => { loadPonds(); loadReport() })
+onMounted(() => { isActive = true; loadPonds(); loadReport() })
 onBeforeUnmount(() => {
+  isActive = false
   resizeObs?.disconnect(); trendChart?.dispose(); rankChart?.dispose(); costTrendChart?.dispose()
 })
 </script>

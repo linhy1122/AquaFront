@@ -75,6 +75,7 @@ const radarRef = ref(null)
 const scatterRef = ref(null)
 const rankRef = ref(null)
 let radarChart = null, scatterChart = null, rankChart = null
+let isActive = false
 
 function initCharts() {
   radarChart = echarts.init(radarRef.value)
@@ -88,6 +89,10 @@ function initCharts() {
 }
 
 let resizeObs = null
+
+function allChartRefsReady() {
+  return [radarRef, scatterRef, rankRef].every(r => r.value && r.value.isConnected && r.value.clientWidth > 0 && r.value.clientHeight > 0)
+}
 
 function renderRadar(data) {
   if (!data?.length) { radarChart?.clear(); return }
@@ -175,7 +180,12 @@ function renderRank(data) {
 function renderCharts() {
   if (!report.value) return
   nextTick(() => {
+    if (!isActive) return
     if (!radarChart) {
+      if (!allChartRefsReady()) {
+        requestAnimationFrame(() => { if (isActive) renderCharts() })
+        return
+      }
       resizeObs = initCharts()
     }
     renderRadar(report.value.pondRadar)
@@ -188,7 +198,7 @@ async function loadReport() {
   loading.value = true; error.value = ''
   try {
     const res = await reportApi.getAnalysis({ range: range.value, pondId: filterPondId.value || undefined })
-    if (res.success) { report.value = res.data?.report || null; renderCharts() }
+    if (res.success) { report.value = res.data?.report || null; if (isActive) renderCharts() }
     else { error.value = res.message || '加载失败' }
   } catch (e) { error.value = e?.message || '加载失败' }
   finally { loading.value = false }
@@ -201,8 +211,9 @@ async function loadPonds() {
   } catch {}
 }
 
-onMounted(() => { loadPonds(); loadReport() })
+onMounted(() => { isActive = true; loadPonds(); loadReport() })
 onBeforeUnmount(() => {
+  isActive = false
   resizeObs?.disconnect(); radarChart?.dispose(); scatterChart?.dispose(); rankChart?.dispose()
 })
 </script>

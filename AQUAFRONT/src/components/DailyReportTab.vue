@@ -59,7 +59,7 @@ import { ref, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import * as echarts from 'echarts'
 import { reportApi } from '@/api/report'
 import { pondApi } from '@/api'
-import { CHART_COLORS, baseBarOption } from '@/composables/useReportChart'
+import { CHART_COLORS, baseBarOption, isContainerReady } from '@/composables/useReportChart'
 
 defineOptions({ name: 'DailyReportTab' })
 
@@ -76,21 +76,32 @@ const costChartRef = ref(null)
 const warehouseChartRef = ref(null)
 let stockChart = null, survivalChart = null, costChart = null, warehouseChart = null
 let resizeObs = null
+let isActive = false
+
+const chartRefs = () => [stockChartRef, survivalChartRef, costChartRef, warehouseChartRef]
 
 function initAll() {
   stockChart = echarts.init(stockChartRef.value)
   survivalChart = echarts.init(survivalChartRef.value)
   costChart = echarts.init(costChartRef.value)
   warehouseChart = echarts.init(warehouseChartRef.value)
-  const targets = [stockChartRef, survivalChartRef, costChartRef, warehouseChartRef]
-  resizeObs = new ResizeObserver(() => targets.forEach(t => t.value && echarts.getInstanceByDom(t.value)?.resize()))
-  targets.forEach(t => resizeObs.observe(t.value))
+  const refs = chartRefs()
+  resizeObs = new ResizeObserver(() => refs.forEach(t => t.value && echarts.getInstanceByDom(t.value)?.resize()))
+  refs.forEach(t => resizeObs.observe(t.value))
 }
 
 function renderCharts() {
   if (!report.value?.pondSeries?.length) return
   nextTick(() => {
-    if (!stockChart) initAll()
+    if (!isActive) return
+    if (!stockChart) {
+      const refs = chartRefs()
+      if (!refs.every(isContainerReady)) {
+        requestAnimationFrame(() => { if (isActive) renderCharts() })
+        return
+      }
+      initAll()
+    }
     const ponds = report.value.pondSeries
     const labels = ponds.map(p => p.pondCode || p.pondName || `塘口 ${p.pondId}`)
 
@@ -128,7 +139,7 @@ async function loadReport() {
   loading.value = true; error.value = ''
   try {
     const res = await reportApi.getDaily({ date: reportDate.value, pondId: filterPondId.value || undefined })
-    if (res.success) { report.value = res.data?.report || null; renderCharts() }
+    if (res.success) { report.value = res.data?.report || null; if (isActive) renderCharts() }
     else { error.value = res.message || '加载失败' }
   } catch (e) { error.value = e?.message || '加载失败' }
   finally { loading.value = false }
@@ -141,8 +152,9 @@ async function loadPonds() {
   } catch {}
 }
 
-onMounted(() => { loadPonds(); loadReport() })
+onMounted(() => { isActive = true; loadPonds(); loadReport() })
 onBeforeUnmount(() => {
+  isActive = false
   resizeObs?.disconnect()
   stockChart?.dispose(); survivalChart?.dispose(); costChart?.dispose(); warehouseChart?.dispose()
 })

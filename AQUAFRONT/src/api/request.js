@@ -20,7 +20,9 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   response => response.data,
   error => {
-    console.error('API Error:', error.response || error)
+    if (error.response?.status !== 401) {
+      console.error('API Error:', error.response || error)
+    }
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
     }

@@ -29,6 +29,14 @@ export async function loadCurrentUser(force = false) {
     return state.user
   }
 
+  if (!localStorage.getItem('token')) {
+    state.user = null
+    state.loaded = true
+    state.error = ''
+    state.loading = false
+    return null
+  }
+
   state.loading = true
   state.error = ''
   requestPromise = authApi.getCurrentUser()

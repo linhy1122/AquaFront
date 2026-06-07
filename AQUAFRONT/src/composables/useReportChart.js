@@ -4,6 +4,19 @@ import * as echarts from 'echarts'
 export const CHART_COLORS = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4']
 export const CHART_COLORS_GRADIENT = ['#5470c6', '#91cc75', '#fac858']
 
+export function isContainerReady(ref) {
+  const el = ref.value
+  return el !== null && el.isConnected === true && el.clientWidth > 0 && el.clientHeight > 0
+}
+
+export async function waitForContainer(ref, maxRetries = 5) {
+  for (let i = 0; i < maxRetries; i++) {
+    if (isContainerReady(ref)) return true
+    await new Promise(resolve => requestAnimationFrame(resolve))
+  }
+  return isContainerReady(ref)
+}
+
 export function useChart(containerRef) {
   let instance = null
   let resizeObserver = null
